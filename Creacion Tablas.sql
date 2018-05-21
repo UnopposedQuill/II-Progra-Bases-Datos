@@ -44,7 +44,7 @@ create table TipoServicio(
 create table Abonado(
 	id int identity primary key,
 	nombre varchar(20)unique not null,
-	idDocumento int not null,
+	--idDocumento int not null,--este campo fue desechado
 	habilitado bit not null default 1
 );
 --ahora empezaré a crear todas las tablas que requieren un FK

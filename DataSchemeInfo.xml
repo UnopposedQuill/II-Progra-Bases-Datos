@@ -1,0 +1,12 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+					xmlns:sql="urn:schemas-microsoft-com:mapping-schema"> 
+	<xsd:element name="XML" sql:is-constant=1>
+		<xsd:element name="Abonado" sql:relation="Abonado" maxOccurs="unbounded">
+			<xsd:complexType>
+				<sequence>
+					<xsd:element name="Nombre" sql:field="nombre" type="xsd:string"/>
+				</sequence>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:element>
+</xsd:schema>
