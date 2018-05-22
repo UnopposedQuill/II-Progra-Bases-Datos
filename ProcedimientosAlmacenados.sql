@@ -63,12 +63,12 @@ end
 
 if object_id('SPinsertarAbonado','P') is not null drop procedure SPinsertarAbonado;
 go
-create procedure SPinsertarAbonado @nombre varchar(20), @idDocumento int
+create procedure SPinsertarAbonado @nombre varchar(20)
 as begin
 	set nocount on;
 	begin transaction;
 	begin try
-		insert into Abonado(nombre, idDocumento) values (@nombre, @idDocumento);
+		insert into Abonado(nombre) values (@nombre);
 		commit;
 		return @@identity;
 	end try
@@ -87,7 +87,7 @@ as begin
 	begin transaction;
 	begin try
 		insert into Recibo(
-			FKPropiedad, fechaEmision, totalAPagarSinIntereses, interesMoratorio,
+			FKPropiedad, fechaEmision, totalAPagarSinIntereses, interesMoratorios,
 			totalPagado, fechaLimite, fechaPagado
 		) values ((select P.id from Propiedad P where P.numeroFinca = @numeroFinca), @fechaEmision,
 		@totalAPagarSinIntereses, @interesMoratorios, @totalPagado, @fechaLimite, @fechaPagado
