@@ -246,15 +246,56 @@ as begin
 	begin transaction;
 	begin try
 		update R
-		set R.fechaPagado = @fechaPago
+		set R.fechaPagado = @fechaPago, R.totalPagado = case when datediff(day, R.fechaEmision, R.fechaLimite) > 0 then R.totalAPagarSinIntereses+0.5*P.valor
+							else R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor
+							end
 		from Recibo as R
+		inner join Propiedad P on P.id = R.FKPropiedad
+		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
+		inner join Municipalidad M on M.id = MxP.FKMunicipalidad
 		where R.fechaPagado is null and R.FKPropiedad = @idPropiedad
 			and R.id = (select Top 1 R.id from Recibo R order by R.fechaEmision desc);
-		return @idPropiedad;
 	end try
 	begin catch
 		rollback;
 		select ERROR_MESSAGE();
 		return -50001;
 	end catch
+end
+
+if object_id('SPmayoresMorosos','P') is not null drop procedure SPinsertarServicioXPropiedad;
+go
+create procedure SPmayoresMorosos 
+as begin
+	declare @tablaResultado table(nombre varchar(20), monto int, cantidadRecibosPendientes int);
+	insert into @tablaResultado
+		select A.nombre,
+			   (select R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor) as monto,
+			   (select count(*) from Recibo R inner join AbonadoXPropiedad AxP on AxP.FKPropiedad = R.FKPropiedad where datediff(day, R.fechaEmision, R.fechaLimite) > 0) as cantidadRecibosSinPagar
+		from Abonado A
+		inner join AbonadoXPropiedad AxP on AxP.FKAbonado = A.id
+		inner join Propiedad P on AxP.FKPropiedad = P.id
+		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = AxP.FKPropiedad
+		inner join Municipalidad M on M.id = MxP.FKMunicipalidad 
+		inner join Recibo R on R.FKPropiedad = AxP.FKPropiedad
+		where datediff(day, R.fechaEmision, R.fechaLimite) > 0--donde el recibo está pendiente
+		order by monto desc;
+	return (select top 20 T.nombre, T.monto, T.cantidadRecibosPendientes from @tablaResultado T);
+end
+
+if object_id('SPlistaPendientes','P') is not null drop procedure SPinsertarServicioXPropiedad;
+go
+create procedure SPlistaPendientes @idAbonado int
+as 
+begin
+	return (select R.id, R.totalAPagarSinIntereses as totalAPagarSinIntereses, 
+				   R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor as totalIntereses,
+				   R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor as totalAPagar
+		from Recibo R
+		inner join AbonadoXPropiedad AxP on AxP.FKAbonado = @idAbonado
+		inner join Propiedad P on AxP.FKPropiedad = R.FKPropiedad
+		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
+		inner join Municipalidad M on M.id = MxP.FKMunicipalidad
+		where datediff(day, R.fechaEmision, R.fechaLimite) > 0--donde el recibo está pendiente
+		order by R.fechaEmision);
 end

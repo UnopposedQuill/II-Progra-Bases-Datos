@@ -93,7 +93,15 @@ begin
 					from Recibo R
 					where R.FKPropiedad = T.FKPropiedad--me aseguro de que sea la propiedad correcta
 					order by R.fechaEmision desc);--tomo el más viejo esa propiedad, y lo pago
-		
+		--ahora falta actualizar aquellos que pagaron de manera morosa.
+		update R
+		set R.totalPagado = case when datediff(day, R.fechaEmision, R.fechaLimite) > 0 then R.totalAPagarSinIntereses+0.5*P.valor
+							else R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor
+							end
+		from Recibo as R
+		inner join Propiedad P on P.id = R.FKPropiedad
+		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
+		inner join Municipalidad M on M.id = MxP.FKMunicipalidad
 		--ahora sólo coloco este 1, para indicar que los datos están listos
 		insert into DatosControlBase(datosSimulacionListos) values(1);--ya todo está cargado
 		commit;

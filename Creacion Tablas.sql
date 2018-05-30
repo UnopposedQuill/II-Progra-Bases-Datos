@@ -57,7 +57,7 @@ create table Recibo(
 	fechaEmision date not null,
 	totalAPagarSinIntereses float not null,
 	interesMoratorios float not null,
-	--totalPagado float not null check (totalPagado >= 0) default 0,--esto se eliminó puesto que se determinó que es innecesaria la característica de "ir pagando a pocos"
+	totalPagado float not null check (totalPagado >= 0) default 0,
 	fechaLimite date not null,
 	fechaPagado date, --esta si puede ser nula, dejará de ser nula una vez se haya pagado completamente el recibo
 	habilitado bit not null default 1
