@@ -228,6 +228,7 @@ as begin
 			where S.FKPropiedad = @contadorBajo;
 			set @contadorBajo += 1;			
 		end
+		commit;
 		return (select count(*) from Recibo);--retorno la cantidad de recibos generados
 	end try
 	begin catch
