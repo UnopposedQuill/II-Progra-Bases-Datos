@@ -223,10 +223,10 @@ as begin
 			);--sumo todos los costos de los servicios más el costo del agua, que está por separado
 			declare @idRecibo int = @@identity;
 			insert into Linea(FKPropiedad, FKTipoServicio, FKRecibo)
-				select @contadorBajo, S.FKTipoServicio, @idRecibo
-				from ServicioXPropiedad S
-				where S.FKPropiedad = @contadorBajo;
-			
+			select @contadorBajo, S.FKTipoServicio, @idRecibo
+			from ServicioXPropiedad S
+			where S.FKPropiedad = @contadorBajo;
+			set @contadorBajo += 1;			
 		end
 		return (select count(*) from Recibo);--retorno la cantidad de recibos generados
 	end try
