@@ -18,8 +18,8 @@ create table DatosControlBase(
 create table Municipalidad(
 	id int identity primary key,
 	nombre varchar(20)unique not null,
-	diaEmision date not null,
-	diaLimite date not null,
+	diaEmision tinyint not null,
+	diaLimite tinyint not null,
 	interesesMorosidad float not null,
 	valorMetroCubicoAgua float not null,
 	habilitado bit not null default 1
@@ -38,6 +38,7 @@ create table TipoServicio(
 	id int identity primary key,
 	nombre varchar(20)unique not null,
 	valor float not null,
+	variable bit not null,
 	habilitado bit not null default 1
 );
 
@@ -47,33 +48,33 @@ create table Abonado(
 	--idDocumento int not null,--este campo fue desechado
 	habilitado bit not null default 1
 );
+
 --ahora empezaré a crear todas las tablas que requieren un FK
 create table Recibo(
 	id int identity primary key,
 	FKPropiedad int constraint FKRecibos_Propiedad foreign key references Propiedad(id) not null,
+	--FKLinea int constraint FKRecibos_Linea foreign key references Linea(id) not null,--error de modificación
 	fechaEmision date not null,
 	totalAPagarSinIntereses float not null,
 	interesMoratorios float not null,
-	totalPagado float not null check (totalPagado >= 0),
+	--totalPagado float not null check (totalPagado >= 0) default 0,--esto se eliminó puesto que se determinó que es innecesaria la característica de "ir pagando a pocos"
 	fechaLimite date not null,
 	fechaPagado date, --esta si puede ser nula, dejará de ser nula una vez se haya pagado completamente el recibo
 	habilitado bit not null default 1
 );
 
-/*--Esta tabla fue removida y aparentemente sustituida por la de ServiciosXPropiedades
 create table Linea(
 	id int identity primary key,
-	FKRecibo int constraint FKLinea_Recibo foreign key references Recibo(id) not null,
+	FKRecibo int constraint FKLinea_Recibo foreign key references Recibo(id) not null,--esto se movió hacia recibo
 	FKPropiedad int constraint FKLinea_Propiedad foreign key references Propiedad(id) not null,
 	FKTipoServicio int constraint FKLinea_TipoServicio foreign key references TipoServicio(id) not null,
 	habilitado bit not null default 1
 );
-*/
 
 create table ConsumoAgua(
 	id int identity primary key,
 	FKPropiedad int constraint FKConsumoAgua_Propiedad foreign key references Propiedad(id) not null,
-	fechaLectura date unique not null,
+	fechaLectura date not null,
 	contadorMetrosCubicos float not null,
 	habilitado bit not null default 1
 );
@@ -96,5 +97,6 @@ create table ServicioXPropiedad(
 	id int identity primary key,
 	FKPropiedad int constraint FKServicioXPropiedad_Propiedad foreign key references Propiedad(id) not null,
 	FKTipoServicio int constraint FKServicioXPropiedad_TipoServicio foreign key references TipoServicio(id) not null,
+	fechaContratacion date not null,
 	habilitado bit not null default 1
 );

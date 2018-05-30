@@ -12,7 +12,7 @@ rápidamente, utilizaré el mismo orden que el de creación de tablas.
 */
 if object_id('SPinsertarMunicipalidad','P') is not null drop procedure SPinsertarMunicipalidad;
 go
-create procedure SPinsertarMunicipalidad @nombre nvarchar(20), @diaEmision date, @diaLimite date, @interesesMorosidad float, @valorMetroCubicoAgua float
+create procedure SPinsertarMunicipalidad @nombre nvarchar(20), @diaEmision tinyint, @diaLimite tinyint, @interesesMorosidad float, @valorMetroCubicoAgua float
 as begin
 	set nocount on;
 	begin transaction;
@@ -46,12 +46,12 @@ end
 
 if object_id('SPinsertarTipoServicio','P') is not null drop procedure SPinsertarTipoServicio;
 go
-create procedure SPinsertarTipoServicio @nombre varchar(20), @valor float
+create procedure SPinsertarTipoServicio @nombre varchar(20), @valor float, @variable bit
 as begin
 	set nocount on;
 	begin transaction;
 	begin try
-		insert into TipoServicio(nombre, valor) values (@nombre, @valor);
+		insert into TipoServicio(nombre, valor, variable) values (@nombre, @valor, @variable);
 		commit;
 		return @@identity;
 	end try
@@ -81,16 +81,16 @@ end
 if object_id('SPinsertarRecibo','P') is not null drop procedure SPinsertarRecibo;
 go
 create procedure SPinsertarRecibo @numeroFinca int, @fechaEmision date, @totalAPagarSinIntereses float,
-	@interesMoratorios float, @totalPagado float, @fechaLimite date, @fechaPagado date
+	@interesMoratorios float, @fechaLimite date, @fechaPagado date
 as begin
 	set nocount on;
 	begin transaction;
 	begin try
 		insert into Recibo(
-			FKPropiedad, fechaEmision, totalAPagarSinIntereses, interesMoratorios,
-			totalPagado, fechaLimite, fechaPagado
+			FKPropiedad, fechaEmision, totalAPagarSinIntereses,
+			interesMoratorios, fechaLimite, fechaPagado
 		) values ((select P.id from Propiedad P where P.numeroFinca = @numeroFinca), @fechaEmision,
-		@totalAPagarSinIntereses, @interesMoratorios, @totalPagado, @fechaLimite, @fechaPagado
+		@totalAPagarSinIntereses, @interesMoratorios, @fechaLimite, @fechaPagado
 		);
 		commit;
 		return @@identity;
@@ -101,7 +101,7 @@ as begin
 	end catch
 end
 
-/*--SP ya no necesitado debido a la eliminación de la tabla de líneas
+/*--SP ya no necesitado debido a que ahora se realiza en conjunto con la creación de recibos
 if object_id('SPinsertarLinea','P') is not null drop procedure SPinsertarLinea;
 go
 create procedure SPinsertarLinea 
@@ -197,6 +197,63 @@ as begin
 	end try
 	begin catch
 		rollback
+		return -50001;
+	end catch
+end
+
+
+
+if object_id('SPgenerarRecibos','P') is not null drop procedure SPinsertarServicioXPropiedad;
+go
+create procedure SPgenerarRecibos
+as begin
+	set nocount on;
+	begin transaction;
+	begin try
+		declare @contadorBajo int = 1, @contadorAlto int = (select count(*) from Propiedad) + 1;--por cada uno de los identity de las propiedades;
+		while @contadorBajo < @contadorAlto--mientras falten propiedades por revisar
+		begin
+			--primero crearé los recibos, pues las líneas necesitan poder apuntar a ellos
+			insert into Recibo(FKPropiedad, fechaEmision, fechaLimite, interesMoratorios, totalAPagarSinIntereses)
+				values(@contadorBajo, 
+					   dateadd(month, datediff(month, 0, getdate()),(select M.diaEmision from Municipalidad M inner join MunicipalidadXPropiedad MxP on MxP.FKMunicipalidad = M.id where MxP.FKPropiedad = @contadorBajo)),
+					   dateadd(month, datediff(month, 0, getdate()),(select M.diaLimite from Municipalidad M inner join MunicipalidadXPropiedad MxP on MxP.FKMunicipalidad = M.id where MxP.FKPropiedad = @contadorBajo)),
+					   (select M.interesesMorosidad from Municipalidad M inner join MunicipalidadXPropiedad MxP on MxP.FKMunicipalidad = M.id where MxP.FKPropiedad = @contadorBajo),
+					   (select sum(T.valor) from TipoServicio T inner join ServicioXPropiedad SxP on SxP.FKTipoServicio = T.id where SxP.FKPropiedad = @contadorBajo) + ((select M.valorMetroCubicoAgua from Municipalidad M inner join MunicipalidadXPropiedad MxP on MxP.FKMunicipalidad = M.id where MxP.FKPropiedad = @contadorBajo)*(select sum(C.contadorMetrosCubicos) from ConsumoAgua C where C.FKPropiedad = @contadorBajo))
+			);--sumo todos los costos de los servicios más el costo del agua, que está por separado
+			declare @idRecibo int = @@identity;
+			insert into Linea(FKPropiedad, FKTipoServicio, FKRecibo)
+				select @contadorBajo, S.FKTipoServicio, @idRecibo
+				from ServicioXPropiedad S
+				where S.FKPropiedad = @contadorBajo;
+			
+		end
+		return (select count(*) from Recibo);--retorno la cantidad de recibos generados
+	end try
+	begin catch
+		rollback;
+		select ERROR_MESSAGE();
+		return -50001;
+	end catch
+end
+
+if object_id('SPrealizarPago','P') is not null drop procedure SPinsertarServicioXPropiedad;
+go
+create procedure SPrealizarPago @idPropiedad int, @fechaPago date
+as begin
+	set nocount on;
+	begin transaction;
+	begin try
+		update R
+		set R.fechaPagado = @fechaPago
+		from Recibo as R
+		where R.fechaPagado is null and R.FKPropiedad = @idPropiedad
+			and R.id = (select Top 1 R.id from Recibo R order by R.fechaEmision desc);
+		return @idPropiedad;
+	end try
+	begin catch
+		rollback;
+		select ERROR_MESSAGE();
 		return -50001;
 	end catch
 end
