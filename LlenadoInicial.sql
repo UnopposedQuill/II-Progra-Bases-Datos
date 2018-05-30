@@ -82,7 +82,6 @@ begin
 			from @datosXML.nodes('/XML/Pagos') as x(Rec)
 			cross apply @datosXML.nodes('/XML/Pagos/dbo.Pagos') as i(pa)
 			inner join Propiedad P on P.numeroFinca = pa.value('@NumeroFinca', 'int');--tomo todos los datos de los pagos
-		
 		update R
 		set R.fechaPagado = T.fechaPago
 		from Recibo as R 
