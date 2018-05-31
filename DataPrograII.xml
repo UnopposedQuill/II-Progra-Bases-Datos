@@ -1,45 +1,45 @@
 <XML>
 	<Abonado>
-		<dbo.Abonado Nombre="Latonya Joyce" />
-		<dbo.Abonado Nombre="Carlton Cardenas" />
-		<dbo.Abonado Nombre="Charity Dickerson" />
-		<dbo.Abonado Nombre="Jacquelyn Banks" />
-		<dbo.Abonado Nombre="Mindy Garcia" />
-		<dbo.Abonado Nombre="Sonia Chang" />
-		<dbo.Abonado Nombre="Damon Bates" />
-		<dbo.Abonado Nombre="Evan Blair" />
-		<dbo.Abonado Nombre="Brenda Zuniga" />
-		<dbo.Abonado Nombre="Benny Macias" />
-		<dbo.Abonado Nombre="Leanne Patton" />
-		<dbo.Abonado Nombre="Leo Brown" />
-		<dbo.Abonado Nombre="Tabatha Rodriguez" />
-		<dbo.Abonado Nombre="Kelly Wood" />
-		<dbo.Abonado Nombre="Ericka Cruz" />
-		<dbo.Abonado Nombre="Jayson Stevens" />
-		<dbo.Abonado Nombre="Marco Lane" />
-		<dbo.Abonado Nombre="Vickie Curtis" />
-		<dbo.Abonado Nombre="Guillermo Wong" />
-		<dbo.Abonado Nombre="Alice Andrews" />
-		<dbo.Abonado Nombre="Roberto Davila" />
-		<dbo.Abonado Nombre="Lillian Kirk" />
-		<dbo.Abonado Nombre="Joanne Henderson" />
-		<dbo.Abonado Nombre="Debbie Brooks" />
-		<dbo.Abonado Nombre="Warren Mayer" />
-		<dbo.Abonado Nombre="Shawn Arnold" />
-		<dbo.Abonado Nombre="Tom Mc Intyre" />
-		<dbo.Abonado Nombre="Jose Horne" />
-		<dbo.Abonado Nombre="Wade Mullins" />
-		<dbo.Abonado Nombre="Randy Price" />
-		<dbo.Abonado Nombre="Larry Douglas" />
-		<dbo.Abonado Nombre="Grant Ritter" />
-		<dbo.Abonado Nombre="Wendi Glenn" />
-		<dbo.Abonado Nombre="Tamiko Guerra" />
-		<dbo.Abonado Nombre="Darla Valentine" />
-		<dbo.Abonado Nombre="Vickie Shannon" />
-		<dbo.Abonado Nombre="Nora Dudley" />
-		<dbo.Abonado Nombre="Josephine Dalton" />
-		<dbo.Abonado Nombre="Janet Jensen" />
-		<dbo.Abonado Nombre="Kurt Forbes" />
+		<dbo.Abonado Nombre="Latonya Joyce" IDDocumento="2" />
+		<dbo.Abonado Nombre="Carlton Cardenas" IDDocumento="1" />
+		<dbo.Abonado Nombre="Charity Dickerson" IDDocumento="4" />
+		<dbo.Abonado Nombre="Jacquelyn Banks" IDDocumento="5" />
+		<dbo.Abonado Nombre="Mindy Garcia" IDDocumento="3" />
+		<dbo.Abonado Nombre="Sonia Chang" IDDocumento="6" />
+		<dbo.Abonado Nombre="Damon Bates" IDDocumento="8" />
+		<dbo.Abonado Nombre="Evan Blair" IDDocumento="10" />
+		<dbo.Abonado Nombre="Brenda Zuniga" IDDocumento="11" />
+		<dbo.Abonado Nombre="Benny Macias" IDDocumento="9" />
+		<dbo.Abonado Nombre="Leanne Patton" IDDocumento="14" />
+		<dbo.Abonado Nombre="Leo Brown" IDDocumento="13" />
+		<dbo.Abonado Nombre="Tabatha Rodriguez" IDDocumento="12" />
+		<dbo.Abonado Nombre="Kelly Wood" IDDocumento="15" />
+		<dbo.Abonado Nombre="Ericka Cruz" IDDocumento="18" />
+		<dbo.Abonado Nombre="Jayson Stevens" IDDocumento="16" />
+		<dbo.Abonado Nombre="Marco Lane" IDDocumento="17" />
+		<dbo.Abonado Nombre="Vickie Curtis" IDDocumento="21" />
+		<dbo.Abonado Nombre="Guillermo Wong" IDDocumento="19" />
+		<dbo.Abonado Nombre="Alice Andrews" IDDocumento="20" />
+		<dbo.Abonado Nombre="Roberto Davila" IDDocumento="24" />
+		<dbo.Abonado Nombre="Lillian Kirk" IDDocumento="23" />
+		<dbo.Abonado Nombre="Joanne Henderson" IDDocumento="22" />
+		<dbo.Abonado Nombre="Debbie Brooks" IDDocumento="21" />
+		<dbo.Abonado Nombre="Warren Mayer" IDDocumento="25" />
+		<dbo.Abonado Nombre="Shawn Arnold" IDDocumento="28" />
+		<dbo.Abonado Nombre="Tom Mc Intyre" IDDocumento="26" />
+		<dbo.Abonado Nombre="Jose Horne" IDDocumento="27" />
+		<dbo.Abonado Nombre="Wade Mullins" IDDocumento="29" />
+		<dbo.Abonado Nombre="Randy Price" IDDocumento="30" />
+		<dbo.Abonado Nombre="Larry Douglas" IDDocumento="31" />
+		<dbo.Abonado Nombre="Grant Ritter" IDDocumento="33" />
+		<dbo.Abonado Nombre="Wendi Glenn" IDDocumento="34" />
+		<dbo.Abonado Nombre="Tamiko Guerra" IDDocumento="32" />
+		<dbo.Abonado Nombre="Darla Valentine" IDDocumento="35" />
+		<dbo.Abonado Nombre="Vickie Shannon" IDDocumento="36" />
+		<dbo.Abonado Nombre="Nora Dudley" IDDocumento="38" />
+		<dbo.Abonado Nombre="Josephine Dalton" IDDocumento="37" />
+		<dbo.Abonado Nombre="Janet Jensen" IDDocumento="39" />
+		<dbo.Abonado Nombre="Kurt Forbes" IDDocumento="40" />
 	</Abonado>
 	
 	<Municipalidades>
@@ -1083,5 +1083,17 @@
 		<dbo.Pagos NumeroFinca="10556" FechaPago="2018-01-16T09:39:10.990" />
 		<dbo.Pagos NumeroFinca="12223" FechaPago="2018-01-22T23:20:07.530" />
 		<dbo.Pagos NumeroFinca="12840" FechaPago="2018-01-16T06:55:12.540" />
+		<dbo.Pagos NumeroFinca="10556" FechaPago="2018-01-16T09:39:10.990" />
+		<dbo.Pagos NumeroFinca="14223" FechaPago="2018-01-22T23:20:07.530" />
+		<dbo.Pagos NumeroFinca="12540" FechaPago="2018-01-16T06:55:12.540" />
+		<dbo.Pagos NumeroFinca="10356" FechaPago="2018-01-16T09:39:10.990" />
+		<dbo.Pagos NumeroFinca="12233" FechaPago="2018-01-22T23:20:07.530" />
+		<dbo.Pagos NumeroFinca="12850" FechaPago="2018-01-16T06:55:12.540" />
+		<dbo.Pagos NumeroFinca="11556" FechaPago="2018-01-16T09:39:10.990" />
+		<dbo.Pagos NumeroFinca="12423" FechaPago="2018-01-22T23:20:07.530" />
+		<dbo.Pagos NumeroFinca="1240" FechaPago="2018-01-16T06:55:12.540" />
+		<dbo.Pagos NumeroFinca="10856" FechaPago="2018-01-16T09:39:10.990" />
+		<dbo.Pagos NumeroFinca="12423" FechaPago="2018-01-22T23:20:07.530" />
+		<dbo.Pagos NumeroFinca="12820" FechaPago="2018-01-16T06:55:12.540" />
 	</Pagos>
 </XML>
