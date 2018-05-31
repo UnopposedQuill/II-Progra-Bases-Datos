@@ -249,12 +249,10 @@ as begin
 	begin try
 		update R
 		set R.fechaPagado = @fechaPago, R.totalPagado = case when datediff(day, R.fechaEmision, R.fechaLimite) > 0 then R.totalAPagarSinIntereses+0.5*P.valor
-							else R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor
+							else R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(R.interesMoratorios/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor
 							end
 		from Recibo as R
 		inner join Propiedad P on P.id = R.FKPropiedad
-		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
-		inner join Municipalidad M on M.id = MxP.FKMunicipalidad
 		where R.fechaPagado is null and R.FKPropiedad = @idPropiedad
 			and R.id = (select Top 1 R.id from Recibo R order by R.fechaEmision desc);
 	end try
@@ -271,18 +269,16 @@ create procedure SPmayoresMorosos
 as begin
 	declare @tablaResultado table(nombre varchar(20), monto int, cantidadRecibosPendientes int);
 	insert into @tablaResultado
-		select A.nombre,
-			   (select R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor) as monto,
+		select A.nombre as nombre,
+			   (R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(R.interesMoratorios/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor) as monto,
 			   (select count(*) from Recibo R inner join AbonadoXPropiedad AxP on AxP.FKPropiedad = R.FKPropiedad where datediff(day, R.fechaEmision, R.fechaLimite) > 0) as cantidadRecibosSinPagar
 		from Abonado A
 		inner join AbonadoXPropiedad AxP on AxP.FKAbonado = A.id
 		inner join Propiedad P on AxP.FKPropiedad = P.id
-		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = AxP.FKPropiedad
-		inner join Municipalidad M on M.id = MxP.FKMunicipalidad 
 		inner join Recibo R on R.FKPropiedad = AxP.FKPropiedad
 		where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
 		order by monto desc;
-	return (select top 20 T.nombre, T.monto, T.cantidadRecibosPendientes from @tablaResultado T);
+	select top 20 T.nombre, T.monto, T.cantidadRecibosPendientes from @tablaResultado T;
 end
 
 if object_id('SPlistaPendientes','P') is not null drop procedure SPinsertarServicioXPropiedad;
@@ -290,16 +286,14 @@ go
 create procedure SPlistaPendientes @idAbonado int
 as 
 begin
-	return (select R.id, R.totalAPagarSinIntereses as totalAPagarSinIntereses, 
-				   R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor as totalIntereses,
-				   R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor as totalAPagar
-		from Recibo R
-		inner join AbonadoXPropiedad AxP on AxP.FKAbonado = @idAbonado
-		inner join Propiedad P on AxP.FKPropiedad = R.FKPropiedad
-		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
-		inner join Municipalidad M on M.id = MxP.FKMunicipalidad
-		where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
-		order by R.fechaEmision);
+	select R.id, R.totalAPagarSinIntereses as totalAPagarSinIntereses, 
+				R.totalAPagarSinIntereses*(R.interesMoratorios/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor as totalIntereses,
+				R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(R.interesMoratorios/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor as totalAPagar
+	from Recibo R
+	inner join AbonadoXPropiedad AxP on AxP.FKAbonado = @idAbonado
+	inner join Propiedad P on AxP.FKPropiedad = R.FKPropiedad
+	where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
+	order by R.fechaEmision;
 end
 
 if object_id('SPlistaCortes','P') is not null drop procedure SPinsertarServicioXPropiedad;
@@ -307,17 +301,16 @@ go
 create procedure SPlistaCortes @fecha date
 as 
 begin
-	return (select A.nombre, P.descripcion
-			from Abonado A
-			inner join AbonadoXPropiedad AxP on AxP.FKAbonado = A.id
-			inner join Recibo R on R.FKPropiedad = AxP.FKPropiedad
-			inner join Propiedad P on P.id = R.FKPropiedad
-			inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
-			inner join Municipalidad M on M.id = MxP.FKMunicipalidad
-			where R.fechaPagado is null and month(R.fechaEmision) >= month(@fecha)
-			group by P.codigoPostal
-			order by R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor desc
-	);
+	select A.nombre, IC.direccion, (R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(R.interesMoratorios/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor) as montoTotal
+	from Abonado A
+	inner join AbonadoXPropiedad AxP on AxP.FKAbonado = A.id
+	inner join Recibo R on R.FKPropiedad = AxP.FKPropiedad
+	inner join Propiedad P on P.id = R.FKPropiedad
+	inner join AbonadoXInformacionContacto AxIC on AxIC.FKAbonado = A.id
+	inner join InformacionContacto IC on IC.id = AxIC.FKInformacionContacto
+	where R.fechaPagado is null and month(R.fechaEmision) >= month(@fecha)
+	--group by A.nombre, IC.direccion, 3
+	order by montoTotal desc;
 end
 
 if object_id('SPdistritoMasMoroso','P') is not null drop procedure SPdistritoMasMoroso;
@@ -329,21 +322,21 @@ begin
 	begin--morosos por cantidad de monto
 	declare @tablaResultados table(codigoPostal int, cantidadMonto float);
 	insert into @tablaResultados
-		select P.codigoPostal, sum(R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor) as montoTotal
+		select P.codigoPostal as codigoPostal, sum(R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(R.interesMoratorios/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor) as montoTotal
 		from Propiedad P inner join Recibo R on R.FKPropiedad = P.id
-						 inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
-						 inner join Municipalidad M on M.id = MxP.FKMunicipalidad
 		where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
-		order by montoTotal
-	return (select top 1 T.codigoPostal, T.cantidadMonto from @tablaResultados T);
+		group by codigoPostal
+		order by montoTotal;
+	select top 1 T.codigoPostal, T.cantidadMonto from @tablaResultados T;
 	end
 	--morosos por cantidad de recibos pendientes
 	declare @tableResultados table(codigoPostal int, cantidadPendientes int);
 	insert into @tablaResultados
-		select P.codigoPostal, count(*) as cantidadDeRecibosPendientes
+		select P.codigoPostal as codigoPostal, count(*) as cantidadDeRecibosPendientes
 		from Propiedad P inner join Recibo R on R.FKPropiedad = P.id
 		where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
+		group by codigoPostal
 		order by cantidadDeRecibosPendientes;
-	return (select top 1 T.codigoPostal, T.cantidadPendientes from @tableResultados T )
+	select top 1 T.codigoPostal, T.cantidadPendientes from @tableResultados T;
 end
 
