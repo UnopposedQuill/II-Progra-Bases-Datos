@@ -317,3 +317,31 @@ begin
 			order by R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor desc
 	);
 end
+
+if object_id('SPdistritoMasMoroso','P') is not null drop procedure SPdistritoMasMoroso;
+go
+create procedure SPdistritoMasMoroso @modalidad bit
+as 
+begin
+	if(@modalidad = 1)
+	begin--morosos por cantidad de monto
+	declare @tablaResultados table(codigoPostal int, cantidadMonto float);
+	insert into @tablaResultados
+		select P.codigoPostal, sum(R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor) as montoTotal
+		from Propiedad P inner join Recibo R on R.FKPropiedad = P.id
+						 inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
+						 inner join Municipalidad M on M.id = MxP.FKMunicipalidad
+		where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
+		order by montoTotal
+	return (select top 1 T.codigoPostal, T.cantidadMonto from @tablaResultados T);
+	end
+	--morosos por cantidad de recibos pendientes
+	declare @tableResultados table(codigoPostal int, cantidadPendientes int);
+	insert into @tablaResultados
+		select P.codigoPostal, count(*) as cantidadDeRecibosPendientes
+		from Propiedad P inner join Recibo R on R.FKPropiedad = P.id
+		where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
+		order by cantidadDeRecibosPendientes;
+	return (select top 1 T.codigoPostal, T.cantidadPendientes from @tableResultados T )
+end
+
