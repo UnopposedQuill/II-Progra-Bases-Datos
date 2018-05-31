@@ -42,14 +42,32 @@ create table TipoServicio(
 	habilitado bit not null default 1
 );
 
-create table Abonado(
+create table InformacionContacto(
 	id int identity primary key,
-	nombre varchar(20)unique not null,
-	--idDocumento int not null,--este campo fue desechado
-	habilitado bit not null default 1
+	correo varchar(20) not null,
+	direccion varchar(50) not null
 );
 
 --ahora empezaré a crear todas las tablas que requieren un FK
+create table Telefono(
+	id int identity primary key,
+	FKInformacionContacto int constraint FKTelefono_InformacionContacto references InformacionContacto(id) not null,
+	telefono varchar(8) not null
+);
+create table Abonado(
+	id int identity primary key,
+	FKInformacionContacto int constraint FKAbonado_InformacionContacto foreign key references InformacionContacto(id) not null,
+	nombre varchar(20)unique not null,
+	idDocumento int not null,--campo reinsertado para opcionales
+	habilitado bit not null default 1
+);
+
+create table AbonadoXInformacionContacto(
+	id int identity primary key,
+	FKAbonado int constraint FKAbonadoXInformacionContacto_Abonado references Abonado(id),
+	FKInformacionContacto int constraint FKAbonadoXInformacionContacto_InformacionContacto references Abonado(id)
+);
+
 create table Recibo(
 	id int identity primary key,
 	FKPropiedad int constraint FKRecibos_Propiedad foreign key references Propiedad(id) not null,
