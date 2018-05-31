@@ -1,0 +1,25 @@
+<form [formGroup]="frmUsuario">
+
+  <div>
+    <label for="numFinca">Numero de finca</label>
+    <input type="number" formControlName="numFinca" id="numFinca">
+  </div>
+
+  <div>
+    <label for="numAbonado">Numero de abonado</label>
+    <input type="number" formControlName="numAbonado" id="numAbonado">
+  </div>
+
+    <!-- cambiar esto -->
+  <div (click)="seleccionar(usuario,apellido)" *ngFor="let usuario of usuarios">
+    {{usuario.nombre }} {{ usuario.apellido}}
+  </div>
+
+  <div>
+    <button (click)="agregar">Buscar</button>
+  </div>
+
+  <div>
+    <button (click)="pagar">Pagar recibo</button>
+  </div>
+</form>

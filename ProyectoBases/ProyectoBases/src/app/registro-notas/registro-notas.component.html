@@ -1,0 +1,29 @@
+<div class="contenedor">
+
+  <div class="buscar">
+
+    <form [formGroup]="frmUsuario">
+   
+      <div>
+        <select>
+          <option value="1">Morosos más altos</option>
+          <option value="2">Distrito por recibos pendientes</option>
+          <option value="3">Distrito por monto de recibos</option>
+        </select>
+      </div>
+    
+      <!-- cambiar esto -->
+      <div (click)="seleccionar(usuario,apellido)" *ngFor="let usuario of usuarios">
+        {{usuario.nombre }} {{ usuario.apellido}}
+      </div>
+    
+      <div>
+        <button (click)="agregar">Buscar</button>
+      </div>
+    
+    </form>
+
+ 
+  </div>
+
+</div>

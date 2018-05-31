@@ -1,0 +1,32 @@
+<form [formGroup]="frmRegistro">
+  
+  <div>
+    <label for="nombre">Nombre</label>
+    <input type="text" formControlName="nombre" id="nombre">
+  </div>
+
+  <div>
+    <label for="email">Email</label>
+    <input type="text" formControlName="email" id="email">
+  </div>
+
+  <div>
+    <label for="numAbonado">Numero de abonado</label>
+    <input type="text" formControlName="numAbonado" id="numAbonado">
+  </div>
+
+  <div>
+    <label for="carnet">Contraseña</label>
+    <input type="password" formControlName="carnet" id="carnet">
+  </div>
+
+  <div>
+    <label for="confirmar">Confirmar</label>
+    <input type="password" formControlName="confirmar" id="confirmar">
+  </div>
+
+  <button (click)="registro()"
+  [disabled]="!frmRegistro.valid || !validacion()">Registro</button>
+
+
+</form>
