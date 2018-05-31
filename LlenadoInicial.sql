@@ -8,7 +8,8 @@ begin
 		--primero, traer los datos del XML dentro de la base de datos
 		declare @datosXML xml = (select * from openrowset(bulk 'C:\BaseDatos\DataPrograII.xml',single_blob) as x);
 		--inserción de Abonados
-		insert into Abonado(nombre) select a.value('@Nombre[1]','nvarchar(20)')
+		insert into Abonado(nombre, idDocumento) select a.value('@Nombre[1]','nvarchar(20)'),
+												 a.value('@IDDocumento[1]','nvarchar(20)')
 				from @datosXML.nodes('/XML/Abonado') as x(Rec)
 				cross apply @datosXML.nodes('/XML/Abonado/dbo.Abonado') as i(a);
 		--inserción de Municipalidades

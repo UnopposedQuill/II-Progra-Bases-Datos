@@ -63,12 +63,12 @@ end
 
 if object_id('SPinsertarAbonado','P') is not null drop procedure SPinsertarAbonado;
 go
-create procedure SPinsertarAbonado @nombre varchar(20)
+create procedure SPinsertarAbonado @nombre varchar(20), @idDocumento int
 as begin
 	set nocount on;
 	begin transaction;
 	begin try
-		insert into Abonado(nombre) values (@nombre);
+		insert into Abonado(nombre, idDocumento) values (@nombre, @idDocumento);
 		commit;
 		return @@identity;
 	end try
@@ -78,6 +78,7 @@ as begin
 	end catch
 end
 
+/*--ya no necesitado pues se inserta de manera masiva
 if object_id('SPinsertarRecibo','P') is not null drop procedure SPinsertarRecibo;
 go
 create procedure SPinsertarRecibo @numeroFinca int, @fechaEmision date, @totalAPagarSinIntereses float,
@@ -100,6 +101,7 @@ as begin
 		return -50001;
 	end catch
 end
+*/
 
 /*--SP ya no necesitado debido a que ahora se realiza en conjunto con la creación de recibos
 if object_id('SPinsertarLinea','P') is not null drop procedure SPinsertarLinea;
