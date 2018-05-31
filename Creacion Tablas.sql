@@ -54,9 +54,9 @@ create table Telefono(
 	FKInformacionContacto int constraint FKTelefono_InformacionContacto references InformacionContacto(id) not null,
 	telefono varchar(8) not null
 );
+
 create table Abonado(
 	id int identity primary key,
-	FKInformacionContacto int constraint FKAbonado_InformacionContacto foreign key references InformacionContacto(id) not null,
 	nombre varchar(20)unique not null,
 	idDocumento int not null,--campo reinsertado para opcionales
 	habilitado bit not null default 1
