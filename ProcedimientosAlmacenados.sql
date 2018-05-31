@@ -278,7 +278,7 @@ as begin
 		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = AxP.FKPropiedad
 		inner join Municipalidad M on M.id = MxP.FKMunicipalidad 
 		inner join Recibo R on R.FKPropiedad = AxP.FKPropiedad
-		where datediff(day, R.fechaEmision, R.fechaLimite) > 0--donde el recibo está pendiente
+		where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
 		order by monto desc;
 	return (select top 20 T.nombre, T.monto, T.cantidadRecibosPendientes from @tablaResultado T);
 end
@@ -296,6 +296,24 @@ begin
 		inner join Propiedad P on AxP.FKPropiedad = R.FKPropiedad
 		inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
 		inner join Municipalidad M on M.id = MxP.FKMunicipalidad
-		where datediff(day, R.fechaEmision, R.fechaLimite) > 0--donde el recibo está pendiente
+		where datediff(day, R.fechaEmision, R.fechaLimite) > 0 and R.fechaPagado is null--donde el recibo está pendiente
 		order by R.fechaEmision);
+end
+
+if object_id('SPlistaCortes','P') is not null drop procedure SPinsertarServicioXPropiedad;
+go
+create procedure SPlistaCortes @fecha date
+as 
+begin
+	return (select A.nombre, P.descripcion
+			from Abonado A
+			inner join AbonadoXPropiedad AxP on AxP.FKAbonado = A.id
+			inner join Recibo R on R.FKPropiedad = AxP.FKPropiedad
+			inner join Propiedad P on P.id = R.FKPropiedad
+			inner join MunicipalidadXPropiedad MxP on MxP.FKPropiedad = R.FKPropiedad
+			inner join Municipalidad M on M.id = MxP.FKMunicipalidad
+			where R.fechaPagado is null and month(R.fechaEmision) >= month(@fecha)
+			group by P.codigoPostal
+			order by R.totalAPagarSinIntereses+R.totalAPagarSinIntereses*(M.interesesMorosidad/360)*datediff(day, R.fechaEmision, R.fechaLimite)+0.5*P.valor desc
+	);
 end
